@@ -1,6 +1,15 @@
 let https = require('https');
 let fs = require('fs');
 
+const {
+	saveToFile,
+	readToBuffer
+} = require('./read-response.js');
+
+/**
+ * Делает GET-запрос, асинхронно возвращает полученный поток или бросает ошибку в случае ошибки загрузки
+ * @return Promise
+ */
 function get(url, headers){
 	let options = {headers, method:"GET"}
 	return new Promise((resolve, reject)=>{
@@ -26,36 +35,6 @@ function get(url, headers){
 	});
 }
 
-/**
- * @param {ReadableStream} stream
- * @returned {Promise.<Array<stream chunk>>} - возвращает массив считанных из потока кусков
- */
-function allChunks(stream){
-	return new Promise((resolve)=>{
-		let data = [];
-		
-		stream.on('data', (chunk)=>{
-			data.push(chunk);
-		})
-		
-		stream.on('end', (chunk)=>{
-			if(chunk){
-				data.push(chunk);
-			}
-			resolve(data);
-		});
-	});
-}
-
-function saveToFile(stream, filename){
-	return new Promise((resolve, reject)=>{
-		let st = stream.pipe(fs.createWriteStream(filename));
-		//stream.resume();
-		st.on('close', ()=>(resolve()));
-		st.on('error', (err)=>(reject(err)));
-		stream.on('error', (err)=>(reject(err)));
-	});
-}
 
 /**
  * @returned {object}
@@ -67,8 +46,7 @@ function getPage(url, headers){
 		let headers = res.headers;
 		let rawHeaders = res.rawHeaders;
 		
-		return allChunks(res).then((chunks)=>{
-			let buf = Buffer.concat(chunks);
+		return readToBuffer(res).then((buf)=>{
 			let body = buf.toString();
 			
 			return {
@@ -91,8 +69,18 @@ function download(url, headers, filename){
 	})
 }
 
+function getByMime(url, headers, handlers){
+	return get(url, headers).then((res)=>{
+		const type = res.getHeader('Content-Type');
+		const fun = handlers[type] || handlers['*/*'];
+		return fun(res);
+	});
+}
+
 
 module.exports = {
+	get,
 	getPage,
-	download
+	download,
+	getByMime
 }
