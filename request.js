@@ -39,7 +39,7 @@ function get(url, headers){
 /**
  * @returned {object}
  *   @property {object} headers - карта пришедших заголовков
- *   @propertt {string} body - текст ответа
+ *   @property {string} body - текст ответа
  */
 function getPage(url, headers){
 	return get(url, headers).then((res)=>{
