@@ -65,7 +65,7 @@ async function loadHarborMaster(){
 		let m = /https?:\/\/www\.waywardmartian\.com\/harbourmaster\d*\/images\/(\d\d\d-\d\d\d\.jpg)/.exec(url);
 		let name = m[1];
 		let part = parseInt(name.split('-')[0]);
-		if(part>=48){
+		if(part>=0){
 			console.log(url + ' ...');
 			await download(url, {}, '.\\files\\'+name);
 			await wait(100);

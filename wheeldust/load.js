@@ -31,6 +31,7 @@ page: 29,
   total: 569,	
 	*/		
 		console.log(pageData.data.pagination.page)
+		//console.log(pageData.data.pagination);
 		if(!pageData.data.pagination.has_next){
 			lastPage = pageData.data.pagination.page;
 		}
@@ -63,7 +64,7 @@ page: 29,
 		}
 	}
 	
-	function filename(epData, fileExt, i){
+	function getFilename(epData, fileExt, i){
 		let prefix = epData.scene.toString(10).padStart(4, '0');
 		if(typeof i === 'number'){
 			return prefix + ' ' + epData.title + ' - ' + i + '.'+fileExt;
@@ -74,12 +75,12 @@ page: 29,
 	}
 	
 	async function downloadEpisode(epData){
-		if(epData.scene<569) return;
+		if(epData.scene<51) return;
 		let imageUrl = epData.imageUrl;
 		if(imageUrl.length == 1){
 			let url = imageUrl[0];
 			let urlData = URL.parse(url);
-			let filename = filename(epData, urlData.fileExt);
+			let filename = getFilename(epData, urlData.fileExt);
 			console.log(filename);
 			await download(url, {}, '.\\files\\'+filename);
 		}
@@ -87,7 +88,7 @@ page: 29,
 			for(let i=0; i<imageUrl.length; ++i){
 				let url = imageUrl[i];
 				let urlData = URL.parse(url);
-				let filename = filename(epData, urlData.fileExt, i);
+				let filename = getFilename(epData, urlData.fileExt, i);
 				console.log(filename);
 				await download(url, {}, '.\\files\\'+filename);
 			}
@@ -114,7 +115,7 @@ page: 29,
 	}
 
 	for(let ep of episodes.values()){
-		//await prepareEpisode(ep);
+		await prepareEpisode(ep);
 		//await handleFiles(ep);
 	}
 }
